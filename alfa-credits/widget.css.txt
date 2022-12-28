@@ -1,0 +1,211 @@
+@import url('https://fonts.googleapis.com/css2?family={{fontType}}:wght@{{fontWeight}}&display=swap');
+
+* {
+  font-family: '{{fontType}}', sans-serif;
+  color: {{fontColor}};
+  text-transform: uppercase;
+}
+
+body {
+  margin: 0px;
+}
+
+.credits {
+    width: 100%;
+    height: 100%;
+  	overflow: hidden;
+  	position: relative;
+}
+
+.credits__scroll {
+ 	position: absolute;
+  	transform: translate3d(0, 100%, 0);
+  
+  	min-height:100%;
+  	left: 0; right: 0;
+}
+
+.credits__scroll2 {
+ 	position: absolute;
+ 	transform: translate3d(0, 100%, 0);
+  
+  	min-height:100%;
+  	left: 0; right: 0;
+  	animation-delay: calc(50s / {{scrollSpeed}}) !important;
+}
+
+.scrollIt {
+  animation: scrollIt linear infinite; 
+  animation-duration:calc(100s / {{scrollSpeed}});
+}
+
+@keyframes scrollIt {
+  0% {
+	transform: translateY(100%);
+  }
+  100% {
+	transform: translateY(-100%);
+  }
+}
+
+.credits-header {
+  	text-align: center;
+	margin-bottom: 50px;
+}
+
+.credits-header h1 {
+  	font-size: 30px;
+  	text-transform: uppercase;
+  	margin: 0 0 15px;
+}
+
+.credits-header h2 {
+	font-size: 20px;
+  	text-transform: uppercase;
+    margin: 0px;
+}
+
+.list {
+    width: 97%;
+    margin-left: auto;
+    margin-right: auto;
+
+    position: relative;
+    overflow: hidden;
+    
+    /*box-shadow: 10px 10px 0px 0 rgba(0, 0, 0, 0.35);*/
+    /*border-radius: 5px;*/
+    border: 1px solid #ebebeb;
+
+    background-color: #ffffff;
+
+    margin-bottom: 100px;
+}
+
+.list-header {
+    display: flex;
+    position: relative;
+    border-bottom: 1px #ebebeb solid;
+}
+
+.list-header-icon {
+    width: 65px;
+    height: 65px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.list-header-title {
+    flex: 1;
+    margin: 0;
+    display: flex;
+    font-size: 16px;
+    text-align: center;
+    align-items: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    justify-content: center;
+}
+
+.list-header-img {
+    width: auto;
+    max-width: 50px;
+}
+
+.list-light {
+    top: 0;
+    left: 0;
+    width: 45px;
+    height: 100%;
+    position: absolute;
+}
+
+.list-body
+{
+    font-size: 16px;
+}
+
+.list-body-item {
+    height: 3em;
+    display: flex;
+    position: relative;
+    align-items: center;
+    margin-right: 15px;
+    flex-direction: row;
+    justify-content: space-between;
+    letter-spacing: 0.4px;
+}
+
+.list-body-item:not(:last-child):after
+{
+    right: 0;
+    width: calc(100% - 52px);
+    bottom: 0;
+    content: "";
+    position: absolute;
+    border-bottom: 1px #ebebeb solid;    
+}
+
+.list-body-item:nth-child(-n+3) .list-body-item-amount {
+	color: {{fontHighlightColor}};
+}
+
+.list-body-item-rank {
+    width: 32px;
+    height: 100%;
+    display: flex;
+    text-align: center;
+    align-items: center;
+    flex-shrink: 0;
+    justify-content: center;
+}
+
+.list-body-item-text {
+    overflow: hidden;
+    max-width: 100%;
+    flex-grow: 1;
+    white-space: nowrap;
+    margin-right: auto;
+    text-overflow: ellipsis;
+}
+
+.list-body-item-amount {
+    font-variant-numeric: tabular-nums;
+}
+
+.list-body-item-emote {
+    width: 2.5em;
+    height: 2.5em;
+}
+
+.emote {
+    width: 100%;
+    height: 100%;
+    padding: 2px;
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    border-radius: 50%;
+    justify-content: center;
+    background-color: white;
+}
+
+.emote-image {
+    width: 1.5em;
+    height: 1.5em;
+}
+
+.list-complete-item {
+    transition: all 1s;
+}
+
+.list-complete-enter,
+.list-complete-leave-to {
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+.list-complete-leave-active {
+    position: absolute;
+}

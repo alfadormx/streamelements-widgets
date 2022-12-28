@@ -1,0 +1,237 @@
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+<script id="listTemplate" type="text/x-template">
+    <div class="list">
+        <div class="list-header">
+            <div class="list-header-icon" v-bind:style="background">
+                <img class="list-header-img" v-bind:src="icon">
+            </div>
+            <div class="list-header-title">{{title}}</div>
+        </div>
+
+        <div class="list-light" v-bind:style="light"></div>
+
+        <transition-group tag="div" class="list-body" v-if="type">
+            <item
+                v-for="(item, index) in items"
+                v-bind:key="item.id"
+                v-bind:index="index"
+                v-bind:name="item.emote"
+                v-bind:amount="item.amount"
+                v-bind:type="type"
+                v-bind:emote="item.id"
+                class="list-complete-item">
+            </item>
+        </transition-group>
+        <transition-group tag="div" class="list-body" v-else>
+            <item
+                v-for="(item, index) in items"
+                v-bind:key="item.name"
+                v-bind:index="index"
+                v-bind:name="item.name"
+                v-bind:amount="item.amount"
+                class="list-complete-item">
+            </item>
+        </transition-group>
+
+    </div>
+</script>
+
+<script id="itemTemplate" type="text/x-template">
+    <div class="list-body-item">
+        <div class="list-body-item-rank">{{ (index + 1) }}</div>
+        <div class="list-body-item-emote">
+            <div class="emote" v-if="type">
+                <div>
+                    <component v-bind:is="type + 'Emote'" v-bind:id="emote"></component>
+                </div>
+            </div>
+        </div>
+        <div class="list-body-item-text">{{ name }}</div>
+        <div class="list-body-item-amount">{{ amount }}</div>
+    </div>
+</script>
+
+<script id="twitchEmoteTemplate" type="text/x-template">
+    <img class="emote-image" v-bind:src="'https://static-cdn.jtvnw.net/emoticons/v1/' + id + '/1.0'">
+</script>
+
+<script id="bbtvEmoteTemplate" type="text/x-template">
+    <img class="emote-image" v-bind:src="'https://cdn.betterttv.net/emote/' + id + '/1x'">
+</script>
+
+<script id="ffzEmoteTemplate" type="text/x-template">
+    <img class="emote-image" v-bind:src="'https://cdn.frankerfacez.com/emoticon/' + id + '/1'">
+</script>
+
+<div id="chatStatsApp" class="credits">
+
+    <div class="credits__scroll">
+
+        <div class="credits-header">
+            <h1>{{creditsTitle}}</h1>
+            <h2>{{creditsSubtitle}}</h2>
+        </div>
+
+        <list
+            title="{{sessionFollowersTitle}}"
+            background="background-color: rgb(230, 57, 70);"
+            light="background-color: rgba(230, 57, 70, 0.075);"
+            icon="https://img.icons8.com/wired/344/like.png"              
+            v-bind:items="followersEvents"
+            v-if="isSessionFollowersEnabled && followersEvents.length > 0">
+        </list>
+      
+        <list
+            title="{{sessionSubscribersTitle}}"
+            background="background-color: rgb(252, 191, 73);"
+            light="background-color: rgba(252, 191, 73, 0.075);"
+            icon="https://img.icons8.com/fluent-systems-regular/344/star.png"
+            v-bind:items="subscribersEvents"
+            v-if="isSessionSubscribersEnabled && subscribersEvents.length > 0">
+        </list>
+      
+        <list
+            title="{{sessionCheersTitle}}"
+            background="background-color: rgb(168, 218, 220);"
+            light="background-color: rgba(168, 218, 220, 0.075);"
+            icon="https://img.icons8.com/dotty/344/diamond.png"
+            v-bind:items="cheersEvents"
+            v-if="isSessionCheersEnabled && cheersEvents.length > 0">
+        </list>
+      
+        <list
+            title="{{sessionTipsTitle}}"
+            background="background-color: rgb(202, 255, 191);"
+            light="background-color: rgba(202, 255, 191, 0.075);"
+			icon="https://img.icons8.com/ios/344/money.png"
+            v-bind:items="tipsEvents"
+            v-if="isSessionTipsEnabled && tipsEvents.length > 0">
+        </list>
+      
+        <list
+            title="{{chatStatsChattersTitle}}" 
+            background="background-color: rgb(0, 191, 224);"
+            light="background-color: rgba(0, 191, 224, 0.075);" 
+            icon="https://s3.amazonaws.com/cdn.streamelements.com/assets/chat-stats-assets/icons/chatters.svg"
+            v-bind:items="chatters"
+            v-if="isChatStatsEnabled && isChatStatsChattersEnabled && chatters.length > 0">
+        </list>
+
+        <list
+            type="twitch"
+            title="{{chatStatsTwitchTitle}}" 
+            background="background-color: rgb(146, 0, 255);"
+            light="background-color: rgba(146, 0, 255, 0.075);" 
+            icon="https://s3.amazonaws.com/cdn.streamelements.com/assets/chat-stats-assets/icons/twitch.svg"
+            v-bind:items="twitchEmotes"
+			v-if="isChatStatsEnabled && isChatStatsTwitchEmotesEnabled && twitchEmotes.length > 0">
+        </list>
+
+        <list
+            type="bbtv"
+            title="{{chatStatsBBTVTitle}}" 
+            background="background-color: rgb(255, 94, 101);"
+            light="background-color: rgba(255, 94, 101, 0.075);" 
+            icon="https://s3.amazonaws.com/cdn.streamelements.com/assets/chat-stats-assets/icons/bttv.svg"
+            v-bind:items="bbtvEmotes"
+			v-if="isChatStatsEnabled && isChatStatsBBTVEmotesEnabled && bbtvEmotes.length > 0">
+        </list>
+
+        <list
+            type="ffz"
+            title="{{chatStatsFFZTitle}}" 
+            background="background-color: rgb(82, 211, 169);"
+            light="background-color: rgba(82, 211, 169, 0.075);" 
+            icon="https://s3.amazonaws.com/cdn.streamelements.com/assets/chat-stats-assets/icons/frankerfacez.png"
+            v-bind:items="ffzEmotes"
+			v-if="isChatStatsEnabled && isChatStatsFFZEmotesEnabled && ffzEmotes.length > 0">
+        </list>
+
+    </div>
+
+    <div class="credits__scroll2">
+
+        <div class="credits-header">
+            <h1>{{creditsTitle}}</h1>
+            <h2>{{creditsSubtitle}}</h2>
+        </div>
+
+        <list
+            title="{{sessionFollowersTitle}}"
+            background="background-color: rgb(230, 57, 70);"
+            light="background-color: rgba(230, 57, 70, 0.075);"
+            icon="https://img.icons8.com/wired/344/like.png"              
+            v-bind:items="followersEvents"
+            v-if="isSessionFollowersEnabled && followersEvents.length > 0">
+        </list>
+      
+        <list
+            title="{{sessionSubscribersTitle}}"
+            background="background-color: rgb(252, 191, 73);"
+            light="background-color: rgba(252, 191, 73, 0.075);"
+            icon="https://img.icons8.com/fluent-systems-regular/344/star.png"
+            v-bind:items="subscribersEvents"
+            v-if="isSessionSubscribersEnabled && subscribersEvents.length > 0">
+        </list>
+      
+        <list
+            title="{{sessionCheersTitle}}"
+            background="background-color: rgb(168, 218, 220);"
+            light="background-color: rgba(168, 218, 220, 0.075);"
+            icon="https://img.icons8.com/dotty/344/diamond.png"
+            v-bind:items="cheersEvents"
+            v-if="isSessionCheersEnabled && cheersEvents.length > 0">
+        </list>
+      
+        <list
+            title="{{sessionTipsTitle}}"
+            background="background-color: rgb(202, 255, 191);"
+            light="background-color: rgba(202, 255, 191, 0.075);"
+			icon="https://img.icons8.com/ios/344/money.png"
+            v-bind:items="tipsEvents"
+            v-if="isSessionTipsEnabled && tipsEvents.length > 0">
+        </list>
+      
+        <list
+            title="{{chatStatsChattersTitle}}" 
+            background="background-color: rgb(0, 191, 224);"
+            light="background-color: rgba(0, 191, 224, 0.075);" 
+            icon="https://s3.amazonaws.com/cdn.streamelements.com/assets/chat-stats-assets/icons/chatters.svg"
+            v-bind:items="chatters"
+            v-if="isChatStatsEnabled && isChatStatsChattersEnabled && chatters.length > 0">
+        </list>
+
+        <list
+            type="twitch"
+            title="{{chatStatsTwitchTitle}}" 
+            background="background-color: rgb(146, 0, 255);"
+            light="background-color: rgba(146, 0, 255, 0.075);" 
+            icon="https://s3.amazonaws.com/cdn.streamelements.com/assets/chat-stats-assets/icons/twitch.svg"
+            v-bind:items="twitchEmotes"
+			v-if="isChatStatsEnabled && isChatStatsTwitchEmotesEnabled && twitchEmotes.length > 0">
+        </list>
+
+        <list
+            type="bbtv"
+            title="{{chatStatsBBTVTitle}}" 
+            background="background-color: rgb(255, 94, 101);"
+            light="background-color: rgba(255, 94, 101, 0.075);" 
+            icon="https://s3.amazonaws.com/cdn.streamelements.com/assets/chat-stats-assets/icons/bttv.svg"
+            v-bind:items="bbtvEmotes"
+			v-if="isChatStatsEnabled && isChatStatsBBTVEmotesEnabled && bbtvEmotes.length > 0">
+        </list>
+
+        <list
+            type="ffz"
+            title="{{chatStatsFFZTitle}}" 
+            background="background-color: rgb(82, 211, 169);"
+            light="background-color: rgba(82, 211, 169, 0.075);" 
+            icon="https://s3.amazonaws.com/cdn.streamelements.com/assets/chat-stats-assets/icons/frankerfacez.png"
+            v-bind:items="ffzEmotes"
+			v-if="isChatStatsEnabled && isChatStatsFFZEmotesEnabled && ffzEmotes.length > 0">
+        </list>
+
+    </div>
+
+</div>

@@ -1,0 +1,138 @@
+Vue.component('list', {
+    props: ['type', 'title', 'background', 'light', 'icon', 'items'],
+    template: "#listTemplate"
+});
+
+Vue.component('item', {
+    props: ['index', 'name', 'amount', 'type', 'emote'],
+    template: "#itemTemplate"
+});
+
+Vue.component('twitchEmote', {
+    props: ['id'],
+    template: "#twitchEmoteTemplate"
+});
+
+Vue.component('bbtvEmote', {
+    props: ['id'],
+    template: "#bbtvEmoteTemplate"
+});
+
+Vue.component('ffzEmote', {
+    props: ['id'],
+    template: "#ffzEmoteTemplate"
+});
+
+var chatStatsApp = new Vue({
+    el: '#chatStatsApp',
+    data: {
+      	isSessionFollowersEnabled: true,
+		isSessionSubscribersEnabled: true,
+		isSessionCheersEnabled: true,
+		isSessionTipsEnabled: true,
+      	isChatStatsEnabled: true,
+      	isChatStatsChattersEnabled: true,
+      	isChatStatsTwitchEmotesEnabled: true,
+      	isChatStatsBBTVEmotesEnabled: true,
+      	isChatStatsFFZEmotesEnabled: true,
+      	followersEvents: [],
+      	subscribersEvents: [],
+      	cheersEvents: [],
+      	tipsEvents: [],
+      	chatters: [],
+        twitchEmotes: [],
+        bbtvEmotes: [],
+        ffzEmotes: []
+    }
+});
+
+let credits1 = document.querySelector('.credits__scroll'),
+ 	credits2 = document.querySelector('.credits__scroll2');
+
+let ignoredUsers = [],
+    channel = '',
+    isScrolling = false;
+
+let startScroll = () => {
+	credits1.offsetWidth;
+	credits2.offsetWidth;
+	credits1.classList.add('scrollIt');
+	credits2.classList.add('scrollIt');
+  
+  	isScrolling = true;
+};
+
+let refreshChatStats = () => {
+	fetch(`https://api.streamelements.com/kappa/v2/chatstats/${channel}/stats`, {})
+		.then(response => response.json())
+		.then(function(chatData) {
+			chatStatsApp.chatters = chatData.chatters.filter(c => {
+				return ignoredUsers.indexOf(c.name.toLowerCase()) === -1
+			}).slice(0,10);
+
+			chatStatsApp.twitchEmotes = chatData.twitchEmotes.slice(0, 10);
+			chatStatsApp.bbtvEmotes = chatData.bttvEmotes.slice(0, 10);
+			chatStatsApp.ffzEmotes = chatData.ffzEmotes.slice(0, 10);
+      
+      		if (!isScrolling) {
+				startScroll();
+            }
+		})
+		.catch(error => {
+                  console.error('Error:', error);
+		});
+};
+
+window.addEventListener('onWidgetLoad', function(obj) {
+  	let fieldData = obj.detail.fieldData;
+  	let recents = obj.detail.recents;
+  	let session = obj.detail.session.data;
+  	let currency = obj.detail.currency;
+  
+  	channel = obj.detail.channel.username;
+  	ignoredUsers = fieldData.chatStatsIgnoredUsers.toLowerCase().replace(" ", "").split(",");
+  
+	chatStatsApp.isSessionFollowersEnabled = fieldData.enableSessionFollowers;
+	chatStatsApp.isSessionSubscribersEnabled = fieldData.enableSessionSubscribers;
+	chatStatsApp.isSessionCheersEnabled = fieldData.enableSessionCheers;
+	chatStatsApp.isSessionTipsEnabled = fieldData.enableSessionTips;
+  	chatStatsApp.isChatStatsEnabled = fieldData.enableChatStats;
+  	chatStatsApp.isChatStatsChattersEnabled = fieldData.enableChatters;
+	chatStatsApp.isChatStatsTwitchEmotesEnabled = fieldData.enableTwitchEmotes;
+	chatStatsApp.isChatStatsBBTVEmotesEnabled = fieldData.enableBBTVEmotes;
+	chatStatsApp.isChatStatsFFZEmotesEnabled = fieldData.enableFFZEmotes;
+
+  	if (chatStatsApp.isSessionFollowersEnabled && session['follower-session']) {
+        chatStatsApp.followersEvents = recents.filter(e => { return e.type === 'follower' })
+                                				.slice(0, session['follower-session']['count'])
+                                				.map(e => ({ id: e.createdAt, name: e.name, amount: '' }));
+    }
+  
+  	if (chatStatsApp.isSessionSubscribersEnabled && session['subscriber-session']) {
+  		chatStatsApp.subscribersEvents = recents.filter(e => { return e.type === 'subscriber' })
+      						  	 				.slice(0, session['subscriber-session']['count'])
+      						  	 				.map(e => ({ id: e.createdAt, name: e.name, amount: '' }));
+    }
+  
+  	if (chatStatsApp.isSessionCheersEnabled && session['cheer-session']) {
+  		chatStatsApp.cheersEvents = recents.filter(e => { return e.type === 'cheer' })
+      						  	 			.slice(0, session['cheer-session']['amount'])
+      						  	 			.map(e => ({ id: e.createdAt, name: e.name, amount: e.amount }));
+    }
+  
+  	if (chatStatsApp.isSessionTipsEnabled && session['tip-count']) {
+  		chatStatsApp.tipsEvents = recents.filter(e => { return e.type === 'tip' })
+      						  	 		 .slice(0, session['tip-count']['count'])
+      						  	 		 .map(e => ({ id: e.createdAt, name: e.name, amount: e.amount + ' ' + userCurrency.symbol }));
+    }
+  
+  	if (chatStatsApp.isChatStatsEnabled) {
+		refreshChatStats();
+      
+		setInterval(function() {
+			refreshChatStats();
+		}, 300);
+    } else {
+		startScroll();
+    }
+});
